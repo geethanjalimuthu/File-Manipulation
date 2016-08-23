@@ -31,5 +31,6 @@ Route::get('/uploads/{folder?}','UploadController@uplds');
 Route::post('/uploads','UploadController@postuplds');
 Route::get('/folder','UploadController@getfolder');
 Route::post('/folder','UploadController@postfolder');
-Route::get('/delete/{id}/{name}/{dir?}','UploadController@destroy');
-
+Route::get('/delete/{id}/{dir}/{file?}','UploadController@destroy');
+Route::get('/deletefile/{id}/{file}','UploadController@filedestroy');
+Route::get('/empty/{id}/{dir}' , 'UploadController@emptyfolder');

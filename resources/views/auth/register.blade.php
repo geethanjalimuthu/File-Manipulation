@@ -23,7 +23,7 @@
 			<button type="submit"  name="submit" class="btn btn-success">Register</button>
 		</div>
 		<div>
-			<p>Already registered <a href="login">Please login</a></p>
+			<p>Already registered <a href="{{url('login')}}">Please login</a></p>
 		</div>
 	</div>
 </form>

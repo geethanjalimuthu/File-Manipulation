@@ -20,41 +20,43 @@ class UploadController extends Controller
     	
     	return view('auth.register');
     }
+
     public function postregister(RegisterRequest $request){
 
     	$user = User::create([
     		'name'=> $request->input('name'),
     		'email' => $request->input('email'),
     		'password' => bcrypt($request->input('password'))]);
-    	if($user){
-    		return redirect('login')->with(['message' =>'Registered successfully']);
-    	}
-    	else{
-    		return back()->withInputs()->with($error);
-    	}
+    		if($user){
+    			return redirect('login')->with(['message' =>'Registered successfully']);
+    		}
+    		else{
+    			return back()->withInputs()->with($error);
+    		}
     }
-	public function profile(){
+	public function profile(Request $request){
 
 		$id = auth()->user()->id;
 		$directory = Storage::allDirectories('public/uploads/'.$id);
-
-		if($directory){ 
-
-		foreach ($directory as $directories) {
-			
-			$direct = explode('/',$directories);
 		
-			  	$valid = 'public/uploads/'.$id.'/'.end($direct); 	 
-			  	
-			  	 	$file = Storage::allFiles($valid);
-						
-						$result_dir[] = array('dir' => end($direct), 'files' => $file);	
-			}
-	return view('auth.profile')->with(['directory' => $result_dir]);
-	}else{
-		return view('auth.profile');
-	}
-    	
+		if($directory){ 
+				$out_file =  Storage::allFiles('public/uploads/'.$id);
+					
+				foreach ($directory as $directories) {
+					
+					$direct = explode('/',$directories);
+				
+					  	$valid = 'public/uploads/'.$id.'/'.end($direct); 	 
+					  	
+					  	 	$file = Storage::allFiles($valid);
+
+								
+								$result_dir[] = array('dir' => end($direct), 'files' => $file,'count'=> count($file));	
+					}
+			
+		}
+		
+    	return view('auth.profile')->with(['directory' => $result_dir,'out_file' => $out_file]);
     }
 
     public function uplds(){
@@ -68,34 +70,35 @@ class UploadController extends Controller
     	$files=$request->file('file');
     	$filename = $request->file('file')->getClientOriginalName();
     	$folder = $request->input('folder');
-    	//print_r($folder);die();
+    	
     	$check = Storage::disk('local')->exists($id.'/'.$files);
 
     	if($check){
 
-    			echo "file exists";
+    			return back()->with(['message'=>'File already exists']);
     		    	}
     	else{
 
     		if($folder){
 
-    		// $destination = storage_path().'app/uploads/'.$id.'/'.$folder;
+    		
     		Storage::put('public/uploads/'.$id.'/'.$folder.'/'.$filename,file_get_contents($request->file('file')->getRealPath()));
-    		 //echo "fbdsfdf";
+    		 
     	}
     	else{
     	
-    		// $destination = storage_path().'app/uploads/'.$id;
+    		
     		Storage::put('public/uploads/'.$id.'/'.$filename,file_get_contents($request->file('file')->getRealPath()));
-    		// echo "dsfgds";
+    		
     	}
     	$upload = Upload::create(['user_id'=>$id,'upfile'=> $filename]);
-    	if($upload){
-    		return redirect('profile')->with(['folder'=>$folder,'message'=>'File uploaded successfully']);
-    	}
-    	else{
-    		return back()->withInput()->with(['message'=>'Sorry your file does not upload']);
-    	}
+
+	    	if($upload){
+	    		return redirect('profile')->with(['folder'=>$folder,'message'=>'File uploaded successfully']);
+	    	}
+	    	else{
+	    		return back()->withInput()->with(['message'=>'Sorry your file does not upload']);
+	    	}
     	}
 
     	
@@ -106,9 +109,12 @@ class UploadController extends Controller
     }
 
     public function postfolder(Request $request){
+
     	$this->validate($request,['folder' => 'required']);
     	$folder = $request->input('folder');
+
     	$id = auth()->user()->id;
+
     	$check = Storage::disk('local')->exists('uploads/'.$id.'/'.$folder);
     	if(!($check)){
     		
@@ -117,17 +123,57 @@ class UploadController extends Controller
     		return view('uploads.foldercreate',compact('folder'));
     	}
     }
-   public function destroy(Request $request,$id,$file,$dir=''){
-   if($file){
-   		$delete = 'public/uploads/'.$id.'/'.$dir.'/'.$file;
-   	$del = Storage::delete($delete);
+   public function destroy(Request $request,$id,$dir,$file=''){
+   
+	   	if($file){
+	   		$delete = 'public/uploads/'.$id.'/'.$dir.'/'.$file;
+	   		$del = Storage::delete($delete);
+
+	   }
+	   else{
+	   		$delete = 'public/uploads/'.$id.'/'.$dir;
+	   		$del = Storage::deleteDirectory($delete);
+	  }
+	   		if($del){
+	   			return redirect('profile')->with(['message'=>'Your file or folder deleted successfully']);
+	   		}
    }
-   else{
-   		$delete = 'public/uploads/'.$id.'/'.$dir;
-   		$del = Storage::deleteDirectory($delete);
-  }
-   		if($del){
-   			return redirect('profile')->with(['message'=>'Your folder deleted successfully']);
+   public function filedestroy(Request $request,$id,$file){
+   		$delete = 'public/uploads/'.$id.'/'.$file;
+   		$del = Storage::delete($delete);
+
+   			if($del){
+   			return redirect('profile')->with(['message'=>'Your file deleted successfully']);
+   			}
+   }
+   public function emptyfolder(Request $request,$id,$dir){
+   		$empty = 'public/uploads/'.$id.'/'.$dir;
+   		$file = Storage::allFiles($empty);
+
+   		$delete = Storage::delete($file);
+
+   		if($delete){
+   			return redirect('profile')->with(['message'=>'Your folder files are all deleted successfully']);
+   		}
+   		else{
+   			return redirect('profile')->with(['message'=>'Folder files are not deleted']);
    		}
    }
+
+  /** public function destroy(Request $request,$id,$file='',$dir=''){
+   	if($dir){
+   		if($file){
+   			$delete = 'public/uploads/'.$id.'/'.$dir.'/'.$file;
+   	$del = Storage::delete($delete);
+   		}
+   		else{
+   			$delete = 'public/uploads/'.$id.'/'.$dir;
+   		$del = Storage::deleteDirectory($delete);
+   		}
+   	}
+   	else{
+   		$delete = 'public/uploads/'.$id.'/'.$file;
+   		$del = Storage::delete($delete);
+   	}
+   }*/
 }

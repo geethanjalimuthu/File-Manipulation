@@ -13,10 +13,10 @@ class AuthController extends Controller
     }
     public function postlogin(Request $request){
     	$var = $this->validate($request,['email' =>'required|email','password' => 'required|min:8']);
-    
         	if(auth()->attempt(['email'=>$request->input('email'),
     		'password' => $request->input('password')])){
-                 return view('auth.profile')->with(['message' => 'You have successfully logged in']);
+
+                 return redirect('profile')->with(['message' => 'You have successfully logged in']);
     		
         }
         else{

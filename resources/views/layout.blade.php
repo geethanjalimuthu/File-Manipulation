@@ -14,6 +14,11 @@
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
 	<script src="{{ asset('js/script.js') }}"></script>
+	<style>
+		.border-none{
+			border-top-style: none;
+		}
+	</style>
 </head>
 	<body>
 		<nav class="navbar navbar-default">
@@ -40,15 +45,9 @@
 		            <ul class="nav navbar-nav navbar-right">
 		                <li>
 		                	@if(auth()->check())
-		                	<a href="logout">
+		                	<a href="{{url('logout')}}">
 		                        Logout
 		                    </a>
-		                	
-		                	@else
-		                    <a href="#">
-		                        Link
-		                    </a>
-		                    
 		                    @endif
 		                </li>
 		            </ul>
