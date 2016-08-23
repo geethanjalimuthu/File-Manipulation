@@ -3,7 +3,7 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateUsersTable extends Migration
+class CreateTableCarholders extends Migration
 {
     /**
      * Run the migrations.
@@ -12,14 +12,16 @@ class CreateUsersTable extends Migration
      */
     public function up()
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('carholders',function(Blueprint $table){
             $table->increments('id');
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->string('password');
+            $table->string('customer_name');
+            $table->string('carmodel');
+            $table->date('manufacturing_year');
+            $table->text('feedback');
+            $table->string('car_image');
             $table->rememberToken();
             $table->timestamps();
-        });
+        }); 
     }
 
     /**
@@ -29,6 +31,6 @@ class CreateUsersTable extends Migration
      */
     public function down()
     {
-        Schema::drop('users');
+        Schema::drop('carholders');
     }
 }
